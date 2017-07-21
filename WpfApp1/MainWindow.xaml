@@ -43,7 +43,7 @@
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
             <CheckBox x:Name="checkBox" Content="Square" HorizontalAlignment="Left" Margin="24,20,0,0" VerticalAlignment="Top" Checked="checkBox_Checked" Unchecked="checkBox_Checked"/>
-            <CheckBox x:Name="checkBox2" Content="Ooctagonal" HorizontalAlignment="Left" Margin="24,20,0,0" Grid.Row="1" VerticalAlignment="Top" Checked="checkBox2_Checked" Unchecked="checkBox2_Checked"/>
+            <CheckBox x:Name="checkBox2" Content="Octangle" HorizontalAlignment="Left" Margin="24,20,0,0" Grid.Row="1" VerticalAlignment="Top" Checked="checkBox2_Checked" Unchecked="checkBox2_Checked"/>
             <ComboBox x:Name="comboBox" HorizontalAlignment="Left" Margin="165,13,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboBox_SelectionChanged">
                 <ListBoxItem Content="Black"/>
                 <ListBoxItem Content="White"/>
