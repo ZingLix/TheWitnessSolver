@@ -20,8 +20,6 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
-        private map m;
-
         public MainWindow()
         {
             InitializeComponent();
@@ -30,20 +28,15 @@ namespace WpfApp1
         private void button_Click(object sender, RoutedEventArgs e)
         {
             canvas.Clear();
-            canvas.Init();
             int x =Convert.ToInt32(textBox.Text), y=Convert.ToInt32(textBox_Copy.Text);
-            m=new map(x, y);
-            m.Height = Convert.ToInt32(textBox_Height.Text);
-            m.Width = Convert.ToInt32(textBox_Width.Text);
-            m.X = Convert.ToInt32(textBox_X.Text);
-            m.Y = Convert.ToInt32(textBox_Y.Text);
-            canvas.Draw(ref m);
+            canvas.hei = Convert.ToInt32(textBox_Height.Text);
+            canvas.wid = Convert.ToInt32(textBox_Width.Text);
+            canvas.X = Convert.ToInt32(textBox_X.Text);
+            canvas.Y = Convert.ToInt32(textBox_Y.Text);
+            canvas.Init(x,y);
+            canvas.Draw();
         }
 
-        private void textBox_Height_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
 
         private void canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -52,87 +45,31 @@ namespace WpfApp1
 
             if (visual != null)
             {
-                int oriX = m.X, oriY = m.Y;
-                int height = m.Height, width = m.Width;
-                int round = 5;
-                if (visual.type == "cLine")
+                int oriX = canvas.X, oriY = canvas.Y;
+                int height = canvas.hei, width = canvas.wid;
+                canvas.onClick_x = visual.x;
+                canvas.onClick_y = visual.y;
+                canvas.onClick = visual.type;
+                label2_Copy1.Content = visual.x;
+                label2_Copy2.Content = visual.y;
+                if (canvas.onClick == "Square")
                 {
-                    canvas.cLine[visual.x, visual.y].status = (canvas.cLine[visual.x, visual.y].status + 1) % 3;
+                    comboBox.SelectedIndex = canvas.m.GetSqu(canvas.onClick_x, canvas.onClick_y);
+                    comboBox1.SelectedIndex = canvas.m.GetOct(canvas.onClick_x, canvas.onClick_y);
 
-                }
-                if (visual.type == "rLine")
-                {
-                    canvas.rLine[visual.x, visual.y].status = (canvas.rLine[visual.x, visual.y].status + 1) % 3;
-                }
-                if (visual.type == "Point")
-                {
-                    label2_Copy1.Content = visual.x;
-                    label2_Copy2.Content = visual.y;
-                }
-                if (visual.type == "Square")
-                {
-                    label2.Content = Convert.ToInt32(visual.x);
-                    label2_Copy.Content = Convert.ToInt32(visual.y);
-                    canvas.onClick_x = visual.x;
-                    canvas.onClick_y = visual.y;
-                    if (canvas.s[visual.x, visual.y].squ == -1)
-                    {
-                        checkBox.IsChecked = false;
-                        comboBox.SelectedIndex = -1;
-                    }
-                    else
-                    {
-                        checkBox.IsChecked = true;
-                        comboBox.SelectedIndex = canvas.s[visual.x, visual.y].squ;
-                    }
-                    if (canvas.s[visual.x, visual.y].oct == -1)
-                    {
-                        checkBox2.IsChecked = false;
-                        comboBox1.SelectedIndex=-1;
-                    }
-                    else
-                    {
-                        checkBox2.IsChecked = true;
-                        comboBox1.SelectedIndex = canvas.s[visual.x, visual.y].oct;
-                    }
                 }
             }
             else
             {
-                canvas.onClick_x = m.row;
-                canvas.onClick_y = m.column;
+                canvas.onClick = "Nothing";
             }
-                canvas.Clear();
-                canvas.Draw(ref m);
+            canvas.Clear();
+            canvas.Draw();
         }
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
-            m.Start_Point.Clear();
-            m.End_Point.Clear();
-            for(int i = 0; i < canvas.xxx; i++)
-            {
-                VisualWitness v = canvas.GetVisualWitnessChild(i);
-                if (v.type == "rLine")
-                {
-                    m.rLine[v.x, v.y] = canvas.rLine[v.x, v.y];
-                }
-                if (v.type == "cLine")
-                {
-                    m.cLine[v.x, v.y] = canvas.cLine[v.x, v.y];
-                }
-                if (v.type == "Point")
-                {
-                    m.p[v.x, v.y] = canvas.p[v.x, v.y];
-                    if (canvas.p[v.x, v.y].status == 2) m.Start_Point.Add(canvas.p[v.x, v.y]);
-                    if (canvas.p[v.x, v.y].status == 3) m.End_Point.Add(canvas.p[v.x, v.y]);
-                }
-                if (v.type == "Square")
-                {
-                    m.s[v.x, v.y] = canvas.s[v.x, v.y];
-                }
-            }
-            if (m.Start_Point.Count == 0)
+            if (!canvas.m.isStartPointSet())
             {
                 label3.Content = "NO START POINT!!";
                 return;
@@ -141,7 +78,7 @@ namespace WpfApp1
             {
                 label3.Content = "";
             }
-            if (m.End_Point.Count == 0)
+            if (!canvas.m.isEndPointSet())
             {
                 label3.Content = "NO START POINT!!";
                 return;
@@ -150,103 +87,134 @@ namespace WpfApp1
             {
                 label3.Content = "";
             }
-            m.solve();
-            for(int i = 0; i <= m.row; i++)
-            {
-                for(int j = 0; j < m.column; j++)
-                {
-                    if (m.visitedrLine[i, j] == 1)
-                    {
-                        canvas.DrawrLine(ref m, i, j, Brushes.Yellow);
-                    }
-                }
-            }
-            for (int i = 0; i < m.row; i++)
-            {
-                for (int j = 0; j <= m.column; j++)
-                {
-                    if (m.visitedcLine[i, j] == 1)
-                    {
-                        canvas.DrawcLine(ref m, i, j, Brushes.Yellow);
-                    }
-                }
-            }
-            
+            if (canvas.m.solve()) canvas.DrawAns();
+            else label3.Content = "No Answer!";
+
         }
 
         private void checkBox_Checked(object sender, RoutedEventArgs e)
         {
-            int x = Convert.ToInt32(label2.Content);
-            int y = Convert.ToInt32(label2_Copy.Content);
+            int x = canvas.onClick_x;
+            int y = canvas.onClick_y;
             if (checkBox.IsChecked != true)
             {
-                canvas.s[x, y].squ = -1;
+                canvas.SquareSqu[x, y] = -1;
+                canvas.m.SetSqu(x, y, -1);
             }
         }
 
         private void comboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int x = Convert.ToInt32(label2.Content);
-            int y = Convert.ToInt32(label2_Copy.Content);
-            canvas.s[x, y].squ = comboBox.SelectedIndex;
+            int x = canvas.onClick_x;
+            int y = canvas.onClick_y;
+            canvas.SquareSqu[x, y] = comboBox.SelectedIndex;
+            canvas.m.SetSqu(x, y, comboBox.SelectedIndex);
             canvas.Clear();
-            canvas.Draw(ref m);
+            canvas.Draw();
         }
 
         private void checkBox2_Checked(object sender, RoutedEventArgs e)
         {
-            int x = Convert.ToInt32(label2.Content);
-            int y = Convert.ToInt32(label2_Copy.Content);
+            int x = canvas.onClick_x;
+            int y = canvas.onClick_y;
             if (checkBox2.IsChecked != true)
             {
-                canvas.s[x, y].oct = -1;
+                canvas.SquareOct[x, y] = -1;
+                canvas.m.SetOct(x, y, -1);
             }
         }
 
         private void comboBox1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int x = Convert.ToInt32(label2.Content);
-            int y = Convert.ToInt32(label2_Copy.Content);
-            canvas.s[x, y].oct = comboBox1.SelectedIndex;
+            int x = canvas.onClick_x;
+            int y = canvas.onClick_y;
+            canvas.m.SetOct(x, y, comboBox1.SelectedIndex);
+            canvas.SquareOct[x, y] = comboBox1.SelectedIndex;
             canvas.Clear();
-            canvas.Draw(ref m);
+            canvas.Draw();
         }
 
         private void comboBox11_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             canvas.background = comboBox1_Copy.SelectedIndex;
             canvas.Clear();
-            canvas.Draw(ref m);
+            canvas.Draw();
         }
 
         private void button2_Click(object sender, RoutedEventArgs e)
         {
             int x = Convert.ToInt32(label2_Copy1.Content);
             int y = Convert.ToInt32(label2_Copy2.Content);
-            if (canvas.p[x, y].status == 2) canvas.p[x, y].status = 0;
-            else canvas.p[x, y].status = 2;
+            canvas.m.SetStartPoint(x,y);
             canvas.Clear();
-            canvas.Draw(ref m);
+            canvas.Draw();
         }
 
         private void button2_Copy_Click(object sender, RoutedEventArgs e)
         {
             int x = Convert.ToInt32(label2_Copy1.Content);
             int y = Convert.ToInt32(label2_Copy2.Content);
-            if (canvas.p[x, y].status == 3) canvas.p[x, y].status = 0;
-            else canvas.p[x, y].status = 3;
+            canvas.m.SetEndPoint(x, y);
             canvas.Clear();
-            canvas.Draw(ref m);
+            canvas.Draw();
         }
 
         private void button2_Copy1_Click(object sender, RoutedEventArgs e)
         {
-            int x = Convert.ToInt32(label2_Copy1.Content);
-            int y = Convert.ToInt32(label2_Copy2.Content);
-            if (canvas.p[x, y].status == 1) canvas.p[x, y].status = 0;
-            else canvas.p[x, y].status = 1;
-            canvas.Clear();
-            canvas.Draw(ref m);
+            //int x = Convert.ToInt32(label2_Copy1.Content);
+            //int y = Convert.ToInt32(label2_Copy2.Content);
+            //if (canvas.p[x, y].status == 1) canvas.p[x, y].status = 0;
+            //else canvas.p[x, y].status = 1;
+            //canvas.Clear();
+            //canvas.Draw(ref m);
+        }
+
+        private void button3_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            int x = canvas.onClick_x, y = canvas.onClick_y;
+            if (canvas.onClick == "LineRight")
+            {
+                canvas.m.AddLineRight(x,y);
+                canvas.LineRight[x, y] = 2;
+            }
+            if (canvas.onClick == "LineDown")
+            {
+                canvas.m.AddLineDown(x,y);
+                canvas.LineDown[x, y] = 2;
+            }
+            canvas.Draw();
+        }
+
+        private void button3_Click(object sender, RoutedEventArgs e)
+        {
+            int x = canvas.onClick_x, y = canvas.onClick_y;
+            if (canvas.onClick == "LineRight")
+            {
+                canvas.m.ResetLineRight(x, y);
+                canvas.LineRight[x, y] = 0;
+            }
+            if (canvas.onClick == "LineDown")
+            {
+                canvas.m.ResetLineDown(x, y);
+                canvas.LineDown[x, y] = 0;
+            }
+            canvas.Draw();
+        }
+
+        private void button3_Copy1_Click(object sender, RoutedEventArgs e)
+        {
+            int x = canvas.onClick_x, y = canvas.onClick_y;
+            if (canvas.onClick == "LineRight")
+            {
+                canvas.m.RemoveLineRight(x, y);
+                canvas.LineRight[x, y] = 1;
+            }
+            if (canvas.onClick == "LineDown")
+            {
+                canvas.m.RemoveLineDown(x,y);
+                canvas.LineDown[x, y] = 1;
+            }
+            canvas.Draw();
         }
     }
 
@@ -275,17 +243,22 @@ namespace WpfApp1
     public class DrawingCanvas : Canvas
     {
         private List<VisualWitness> visuals = new List<VisualWitness>();
-        public line[,] rLine;
-        public line[,] cLine;
-        public point[,] p;
-        public square[,] s;
         public int onClick_x;
         public int onClick_y;
+        public string onClick;
         public int background=1;
+        public int hei, wid;
+        public int X, Y;
+        public ManagedWitnessGraph m;
+        public int[,] LineDown;
+        public int[,] LineRight;
+        public int[,] Node;
+        public int[,] SquareOct;
+        public int[,] SquareSqu;
 
         public DrawingCanvas()
         {
-            this.Init();
+            //this.Init();
         }
 
         protected override int VisualChildrenCount
@@ -339,112 +312,117 @@ namespace WpfApp1
             }
         }
 
-        public void Init()
+        public void Init(int x,int y)
         {
-            rLine = new line[11, 10];
-            cLine = new line[10, 11];
-            p = new point[11, 11];
-            s = new square[10, 10];
-            for (int i = 0; i < 11; i++)
+            m = new ManagedWitnessGraph(x, y);
+            LineRight = new int[x + 1, y];
+            LineDown = new int[x, y + 1];
+            Node = new int[x + 1, y + 1];
+            SquareOct = new int[x, y];
+            SquareSqu = new int[x, y];
+            for (int i = 0; i <= x; i++)
             {
-                for (int j = 0; j < 10; j++)
+                for(int j = 0; j < y; j++)
                 {
-                    rLine[i, j] = new line(i,j);
+                    LineRight[i, j] = 0;
                 }
             }
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < x; i++)
             {
-                for (int j = 0; j < 11; j++)
+                for (int j = 0; j <= y; j++)
                 {
-                    cLine[i, j] = new line(i,j);
+                    LineDown[i, j] = 0;
                 }
             }
-            for(int i = 0; i < 11; i++)
+            for(int i = 0; i <= x; i++)
             {
-                for(int j = 0; j < 11; j++)
+                for(int j = 0; j <= y; j++)
                 {
-                    p[i, j] = new point(i, j);
+                    Node[i,j] = 0;
                 }
             }
-            for(int i = 0; i < 10; i++)
+            for(int i = 0; i < x; i++)
             {
-                for(int j = 0; j < 10; j++)
+                for(int j = 0; j < y; j++)
                 {
-                    s[i, j] = new square(i, j);
+                    SquareSqu[i,j] = -1;
+                    SquareOct[i, j] = -1;
                 }
             }
         }
 
-        public void DrawLine(ref map m)
+        public void DrawAllSquare()
         {
-            Brush b;
-            for (int i = 0; i <= m.row; i++)
+            for (int i = 0; i < m.row(); i++)
             {
-                for (int j = 0; j < m.column; j++)
+                for (int j = 0; j < m.column(); j++)
                 {
-                    if (rLine[i, j].status == 1) b = Brushes.White;
-                    
-                    else b = Brushes.Black;
-                    this.DrawrLine(ref m, i, j, b);
+                    this.DrawSquare(i, j, GetBrushes(background));
                 }
             }
-            for (int i = 0; i < m.row; i++)
+
+        }
+
+        public void DrawAllPoint()
+        {
+            Brush b;
+            for (int i = 0; i <= m.row(); i++)
             {
-                for (int j = 0; j <= m.column; j++)
+                for (int j = 0; j <= m.column(); j++)
                 {
-                    if (cLine[i, j].status == 1) b = Brushes.White;
-                    
-                    else b = Brushes.Black;
-                    this.DrawcLine(ref m, i, j, b);
+                    b = Brushes.Red;
+                    this.DrawPoint(i, j, b);
+                }
+            }
+        }
+
+        public void Draw()
+        {
+            this.DrawLine();
+            this.DrawAllSquare();
+            this.DrawAllPoint();
+        }
+
+        public void DrawLine()
+        {
+            Brush b;
+            for (int i = 0; i <= m.row(); i++)
+            {
+                for (int j = 0; j <m.column() ; j++)
+                {
+                    b = Brushes.Black;
+                    this.DrawLineRight(i, j, b);
+                }
+            }
+            for (int i = 0; i < m.row(); i++)
+            {
+                for (int j = 0; j <= m.column(); j++)
+                {
+                    b = Brushes.Black;
+                    this.DrawLineDown(i, j, b);
                 }
             }
 
             //return visual;
         }
-
-        public void DrawAllSquare(ref map m)
-        {
-            for (int i = 0; i < m.row; i++)
-            {
-                for (int j = 0; j < m.column; j++)
-                {
-                    this.DrawSquare(ref m, i, j, GetBrushes(background));
-                }
-            }
-
-        }
-
-        public void DrawAllPoint(ref map m)
-        {
-            Brush b;
-            for (int i = 0; i <= m.row; i++)
-            {
-                for (int j = 0; j <= m.column; j++)
-                {
-                    if (p[i, j].status == 1) b = Brushes.Gray;
-                    else b = Brushes.Red;
-                    this.DrawPoint(ref m, i, j, b);
-                }
-            }
-        }
-
-        public void Draw(ref map m)
-        {
-            this.DrawLine(ref m);
-            this.DrawAllSquare(ref m);
-            this.DrawAllPoint(ref m);
-        }
-
-        public void DrawrLine(ref map m, int i, int j, Brush b)
+        
+        public void DrawLineRight(int i,int j,Brush b)
         {
             VisualWitness visual = new VisualWitness();
             DrawingContext dc = visual.RenderOpen();
-            int oriX = m.X, oriY = m.Y;
-            int height = m.Height, width = m.Width;
-            int round = 5;
+            int oriX = X, oriY = Y;
+            int height = hei, width = wid;
+            int round = 5,penWid=4;
+            Pen p = new Pen(Brushes.Red, penWid);
+            if (LineRight[i, j] == 1) b = Brushes.White;
             Rect r = new Rect(oriX + j * (height + width), oriY + i * (height + width), width + 2 * height, height);
             dc.DrawRoundedRectangle(b, null, r, round, round);
-            if (rLine[i, j].status == 2)
+            if (i == onClick_x && j == onClick_y && onClick == "LineRight")
+            {
+                Rect rr= new Rect(oriX + j * (height + width)+height+penWid/2, oriY + i * (height + width) + penWid / 2, width-penWid, height-penWid);
+                dc.DrawRectangle(null, p, rr);
+            }
+            if (LineRight[i, j] == 2)
             {
                 int standX = oriX + height + width / 2 + j * (height + width);
                 int standY = oriY + height / 2 + i * (height + width);
@@ -455,25 +433,32 @@ namespace WpfApp1
                 dc.DrawGeometry(Brushes.Gray, null, g);
             }
             dc.Close();
-            visual.type = "rLine";
+            visual.type = "LineRight";
             visual.x = i;
             visual.y = j;
             this.AddVisual(visual);
         }
 
-        public void DrawcLine(ref map m, int i, int j, Brush b)
+        public void DrawLineDown( int i, int j, Brush b)
         {
             VisualWitness visual = new VisualWitness();
             DrawingContext dc = visual.RenderOpen();
-            int oriX = m.X, oriY = m.Y;
-            int height = m.Height, width = m.Width;
-            int round = 5;
+            int oriX = X, oriY = Y;
+            int height = hei, width = wid;
+            int round = 5, penWid = 4;
+            Pen p = new Pen(Brushes.Red, penWid);
             Rect r = new Rect(oriX + j * (height + width), oriY + i * (height + width), height, width + 2 * height);
+            if (LineDown[i, j] == 1) b = Brushes.White;
             dc.DrawRoundedRectangle(b, null, r, round, round);
-            if (cLine[i, j].status == 2)
+            if (i == onClick_x && j == onClick_y && onClick == "LineDown")
+            {
+                Rect rr = new Rect(oriX + j * (height + width)  + penWid / 2, oriY + i * (height + width) + penWid / 2 + height, height - penWid, width - penWid);
+                dc.DrawRectangle(null, p, rr);
+            }
+            if (LineDown[i, j] == 2)
             {
                 int standX = oriX + height / 2 + j * (height + width);
-                int standY = oriY + height +width/ 2 + i * (height + width);
+                int standY = oriY + height + width / 2 + i * (height + width);
                 int radius = height / 2;
 
                 StreamGeometry g = GetHex(standX, standY, radius);
@@ -481,40 +466,64 @@ namespace WpfApp1
                 dc.DrawGeometry(Brushes.Gray, null, g);
             }
             dc.Close();
-            visual.type = "cLine";
+            visual.type = "LineDown";
             visual.x = i;
             visual.y = j;
             this.AddVisual(visual);
         }
 
-        public void DrawPoint(ref map m, int i, int j, Brush b)
+        public void DrawPoint(int i, int j, Brush b)
         {
             VisualWitness visual = new VisualWitness();
             DrawingContext dc = visual.RenderOpen();
-            int height = m.Height, width = m.Width;
-            int oriX = m.X, oriY = m.Y;
+            int height = hei, width = wid;
+            int oriX = X, oriY = Y;
             int x = oriX + j * (height + width), y = oriY + i * (height + width);
-            if (p[i, j].status <= 1)
+            Pen p = null;
+            if (i == onClick_x && j == onClick_y && onClick == "Point")
             {
-                Rect r = new Rect(x, y, height, height);
-                dc.DrawRoundedRectangle(b, null, r, 5, 5);
+                p = new Pen(Brushes.Orange,5);
             }
-            if (p[i, j].status == 1) dc.DrawGeometry(Brushes.Gray, null, GetHex(x + height / 2, y + height / 2, height / 2));
-            if (p[i, j].status == 2) dc.DrawEllipse(b, null, new Point(x + height / 2, y + height / 2), height, height);
-            if(p[i,j].status==3)
+            if (m.isStartPointSet()&&i == m.GetStartPointX() && j == m.GetStartPointY()) dc.DrawEllipse(b, p, new Point(x + height / 2, y + height / 2), height, height);
+            else if (m.isEndPointSet()&&i == m.GetEndPointX() && j == m.GetEndPointY())
             {
                 Rect rec = new Rect(x, y, height, height);
-                if(i==0) rec = new Rect(x, y-height, height, height*2);
-                if (i == m.row) rec = new Rect(x, y, height, height * 2);
-                if (j == 0) rec = new Rect(x-height, y, height*2, height );
-                if (j == m.column) rec = new Rect(x, y, height * 2, height);
-                dc.DrawRoundedRectangle(b, null, rec, 5, 5);
+                if (i == 0) rec = new Rect(x, y - height, height, height * 2);
+                if (i == m.row()) rec = new Rect(x, y, height, height * 2);
+                if (j == 0) rec = new Rect(x - height, y, height * 2, height);
+                if (j == m.column()) rec = new Rect(x, y, height * 2, height);
+                dc.DrawRoundedRectangle(b, p, rec, 5, 5);
+            }
+            else
+            {
+                Rect r = new Rect(x, y, height, height);
+                dc.DrawRoundedRectangle(b, p, r, 5, 5);
             }
             dc.Close();
             visual.type = "Point";
             visual.x = i;
             visual.y = j;
             this.AddVisual(visual);
+        }
+
+
+        private int min(int x,int y) { return x < y ? x : y; }
+
+        public void DrawAns()
+        {
+            m.SetPtrToStart();
+            int x = m.PtrX(), y = m.PtrY();
+            int xNext=-2, yNext=-2;
+            while (x != m.GetEndPointX()||y!=m.GetEndPointY())
+            {
+                m.PtrToNext();
+                xNext = m.PtrX();
+                yNext = m.PtrY();
+                if (x == xNext) DrawLineRight(x, min(y,yNext), Brushes.Yellow);
+                if (y == yNext) DrawLineDown(min(x, xNext), y, Brushes.Yellow);
+                x = xNext;
+                y = yNext;
+            }
         }
 
         public StreamGeometry GetHex(int i,int j,int radius)
@@ -587,7 +596,6 @@ namespace WpfApp1
             return h;
         }
 
-
         public Brush GetBrushes(int index)
         {
             switch (index)
@@ -602,18 +610,18 @@ namespace WpfApp1
             }
         }
 
-        public void DrawSquare(ref map m, int i, int j, Brush b)
+        public void DrawSquare( int i, int j, Brush b)
         {
             VisualWitness visual = new VisualWitness();
             DrawingContext dc = visual.RenderOpen();
-            int height = m.Height, width = m.Width;
-            int oriX = m.X + height, oriY = m.Y + height;
+            int height = hei, width = wid;
+            int oriX = X + height, oriY = Y + height;
             Rect r = new Rect(oriX + j * (height + width), oriY + i * (height + width), width, width);
             Pen p=null;
-            if (i == onClick_x && j==onClick_y) p = new Pen(Brushes.Red, 2);
+            if (i == onClick_x && j==onClick_y  && onClick=="Square") p = new Pen(Brushes.Red, 2);
             dc.DrawRectangle(b, p, r);
-            if (s[i, j].oct != -1) dc.DrawGeometry(GetBrushes(s[i,j].oct), null, GetOct(oriX + j * (height + width)+width/2, oriY + i * (height + width) + width / 2, width / 4));
-            if (s[i, j].squ != -1) dc.DrawGeometry(GetBrushes(s[i, j].squ), null, GetSqu(oriX + j * (height + width) + width / 2, oriY + i * (height + width) + width / 2, width / 4));
+            if (SquareOct[i,j] != -1) dc.DrawGeometry(GetBrushes(SquareOct[i, j]), null, GetOct(oriX + j * (height + width)+width/2, oriY + i * (height + width) + width / 2, width / 4));
+            if (SquareSqu[i,j] != -1) dc.DrawGeometry(GetBrushes(SquareSqu[i, j]), null, GetSqu(oriX + j * (height + width) + width / 2, oriY + i * (height + width) + width / 2, width / 4));
             dc.Close();
             visual.type = "Square";
             visual.x = i;
@@ -621,355 +629,357 @@ namespace WpfApp1
             this.AddVisual(visual);
         }
     }
-    public class point
-    {
-        public int status;
-        public int x;
-        public int y;
 
-        public point(int x,int y)
-        {
-            status = 0;
-            this.x = x;
-            this.y = y;
-        }
 
-    }
+    //public class point
+    //{
+    //    public int status;
+    //    public int x;
+    //    public int y;
 
-    public class square
-    {
-        public int oct;
-        public int squ ;
-        public int x;
-        public int y;
+    //    public point(int x,int y)
+    //    {
+    //        status = 0;
+    //        this.x = x;
+    //        this.y = y;
+    //    }
 
-        public square() {
-            oct = -1;
-            squ = -1;
-        }
+    //}
 
-        public square(int i,int j)
-        {
-            x = i;
-            y = j;
-            oct = -1;
-            squ = -1;
-        }
+    //public class square
+    //{
+    //    public int oct;
+    //    public int squ ;
+    //    public int x;
+    //    public int y;
 
-    }
+    //    public square() {
+    //        oct = -1;
+    //        squ = -1;
+    //    }
 
-    public class line
-    {
-        private int _x;
-        private int _y;
-        public int status = 0;
-        //0:普通，1:不可通过，2:必须通过
-        public line()
-        {
-            _x = 0;
-            _y = 0;
-            status = 0;
-        }
+    //    public square(int i,int j)
+    //    {
+    //        x = i;
+    //        y = j;
+    //        oct = -1;
+    //        squ = -1;
+    //    }
 
-        public line(int x, int y)
-        {
-            _x = x;
-            _y = y;
-            status = 0;
-        }
-    }
+    //}
 
-    public class map
-    {
-        private int _row;
-        private int _column;
-        private int _X;
-        private int _Y;
-        private int _Height;
-        private int _Width;
-        public List<point> Start_Point;
-        public List<point> End_Point;
-        private int mirror;
-        public line[,] rLine;
-        public line[,] cLine;
-        public point[,] p;
-        public square[,] s;
-        public int[,] visitedcLine;
-        public int[,] visitedrLine;
-        public int[,] visitedPoint;
-        public int[,] visitedSquareOct;
-        public int[,] visitedSquareSqu;
-        public int[,] visitedSquare;
+    //public class line
+    //{
+    //    private int _x;
+    //    private int _y;
+    //    public int status = 0;
+    //    //0:普通，1:不可通过，2:必须通过
+    //    public line()
+    //    {
+    //        _x = 0;
+    //        _y = 0;
+    //        status = 0;
+    //    }
 
-        public map(int row,int column)
-        {
-            _column = column;
-            rLine = new line[11, 10];
-            cLine = new line[10, 11];
-            p = new point[11, 11];
-            s = new square[10, 10];
-            _row = row;
-            Start_Point = new List<point>();
-            End_Point = new List<point>();
-        }
+    //    public line(int x, int y)
+    //    {
+    //        _x = x;
+    //        _y = y;
+    //        status = 0;
+    //    }
+    //}
 
-        public int row
-        {
-            get
-            {
-                return _row;
-            }
-        }
-        public int column
-        {
-            get
-            {
-                return _column;
-            }
-        }
+    //public class ManagedWitnessGraph
+    //{
+    //    private int _row();
+    //    private int _column();
+    //    private int _X;
+    //    private int _Y;
+    //    private int _Height;
+    //    private int _Width;
+    //    public List<point> Start_Point;
+    //    public List<point> End_Point;
+    //    private int mirror;
+    //    public line[,] rLine;
+    //    public line[,] cLine;
+    //    public point[,] p;
+    //    public square[,] s;
+    //    public int[,] visitedcLine;
+    //    public int[,] visitedrLine;
+    //    public int[,] visitedPoint;
+    //    public int[,] visitedSquareOct;
+    //    public int[,] visitedSquareSqu;
+    //    public int[,] visitedSquare;
 
-        public int X
-        {
-            get
-            {
-                return _X;
-            }
-            set
-            {
-                _X = value;
-            }
-        }
-        public int Y
-        {
-            get
-            {
-                return _Y;
-            }
-            set
-            {
-                _Y = value;
-            }
-        }
-        public int Height
-        {
-            get
-            {
-                return _Height;
-            }
-            set
-            {
-                _Height = value;
-            }
-        }
-        public int Width
-        {
-            get
-            {
-                return _Width;
-            }
-            set
-            {
-                _Width = value;
-            }
-        }
+    //    public ManagedWitnessGraph(int row(),int column())
+    //    {
+    //        _column() = column();
+    //        rLine = new line[11, 10];
+    //        cLine = new line[10, 11];
+    //        p = new point[11, 11];
+    //        s = new square[10, 10];
+    //        _row() = row();
+    //        Start_Point = new List<point>();
+    //        End_Point = new List<point>();
+    //    }
 
-        protected int dfs(int x,int y,point ep)
-        {
-            int flag = 0;
-            if (x == ep.x&&y==ep.y&&test()==true) return 1;
-            else
-            {
-                if (x > 0 && this.cLine[x - 1, y].status != 1 && this.visitedcLine[x - 1, y] == 0 && this.visitedPoint[x - 1, y] == 0)
-                {
-                    visitedcLine[x - 1, y] = 1;
-                    visitedPoint[x - 1, y] = 1;
-                    flag = dfs(x - 1, y,ep);
-                    if (flag == 1) return 1;
-                    visitedcLine[x - 1, y] = 0;
-                    visitedPoint[x - 1, y] = 0;
+    //    public int row()
+    //    {
+    //        get
+    //        {
+    //            return _row();
+    //        }
+    //    }
+    //    public int column()
+    //    {
+    //        get
+    //        {
+    //            return _column();
+    //        }
+    //    }
 
-                }
-                if (x < row && this.cLine[x, y].status != 1 && this.visitedcLine[x, y] == 0 && this.visitedPoint[x + 1, y] == 0)
-                {
-                    visitedcLine[x, y] = 1;
-                    visitedPoint[x + 1, y] = 1;
-                    flag = dfs(x + 1, y,ep);
-                    if (flag == 1) return 1;
-                    visitedcLine[x, y] = 0;
-                    visitedPoint[x + 1, y] = 0;
+    //    public int X
+    //    {
+    //        get
+    //        {
+    //            return _X;
+    //        }
+    //        set
+    //        {
+    //            _X = value;
+    //        }
+    //    }
+    //    public int Y
+    //    {
+    //        get
+    //        {
+    //            return _Y;
+    //        }
+    //        set
+    //        {
+    //            _Y = value;
+    //        }
+    //    }
+    //    public int Height
+    //    {
+    //        get
+    //        {
+    //            return _Height;
+    //        }
+    //        set
+    //        {
+    //            _Height = value;
+    //        }
+    //    }
+    //    public int Width
+    //    {
+    //        get
+    //        {
+    //            return _Width;
+    //        }
+    //        set
+    //        {
+    //            _Width = value;
+    //        }
+    //    }
 
-                }
-                if (y > 0 && this.rLine[x, y - 1].status != 1 && this.visitedrLine[x, y - 1] == 0 && this.visitedPoint[x, y - 1] == 0)
-                {
-                    visitedrLine[x, y - 1] = 1;
-                    visitedPoint[x, y - 1] = 1;
-                    flag = dfs(x, y - 1,ep);
-                    if (flag == 1) return 1;
-                    visitedrLine[x, y - 1] = 0;
-                    visitedPoint[x, y - 1] = 0;
+    //    protected int dfs(int x,int y,point ep)
+    //    {
+    //        int flag = 0;
+    //        if (x == ep.x&&y==ep.y&&test()==true) return 1;
+    //        else
+    //        {
+    //            if (x > 0 && this.cLine[x - 1, y].status != 1 && this.visitedcLine[x - 1, y] == 0 && this.visitedPoint[x - 1, y] == 0)
+    //            {
+    //                visitedcLine[x - 1, y] = 1;
+    //                visitedPoint[x - 1, y] = 1;
+    //                flag = dfs(x - 1, y,ep);
+    //                if (flag == 1) return 1;
+    //                visitedcLine[x - 1, y] = 0;
+    //                visitedPoint[x - 1, y] = 0;
 
-                }
-                if (y < column && this.rLine[x, y].status != 1 && this.visitedrLine[x, y] == 0 && this.visitedPoint[x, y + 1] == 0)
-                {
-                    visitedrLine[x, y] = 1;
-                    visitedPoint[x, y + 1] = 1;
-                    flag = dfs(x, y + 1,ep);
-                    if (flag == 1) return 1;
-                    visitedrLine[x, y] = 0;
-                    visitedPoint[x, y + 1] = 0;
-                }
-            }
-            return 0;
-        }
+    //            }
+    //            if (x < row() && this.cLine[x, y].status != 1 && this.visitedcLine[x, y] == 0 && this.visitedPoint[x + 1, y] == 0)
+    //            {
+    //                visitedcLine[x, y] = 1;
+    //                visitedPoint[x + 1, y] = 1;
+    //                flag = dfs(x + 1, y,ep);
+    //                if (flag == 1) return 1;
+    //                visitedcLine[x, y] = 0;
+    //                visitedPoint[x + 1, y] = 0;
 
-        public void solve()
-        {
-            for (int i = 0; i < Start_Point.Count; i++)
-            {
-                for (int j = 0; j < End_Point.Count; j++)
-                {
-                    visitedcLine = new int[row, column + 1];
-                    visitedrLine = new int[row + 1, column];
-                    visitedPoint = new int[row + 1, column + 1];
-                    point sp = Start_Point[i],ep=End_Point[j];
-                    visitedPoint[sp.x, sp.y] = 1;
-                    dfs(sp.x, sp.y,ep);
-                }
-            }
-        }
+    //            }
+    //            if (y > 0 && this.rLine[x, y - 1].status != 1 && this.visitedrLine[x, y - 1] == 0 && this.visitedPoint[x, y - 1] == 0)
+    //            {
+    //                visitedrLine[x, y - 1] = 1;
+    //                visitedPoint[x, y - 1] = 1;
+    //                flag = dfs(x, y - 1,ep);
+    //                if (flag == 1) return 1;
+    //                visitedrLine[x, y - 1] = 0;
+    //                visitedPoint[x, y - 1] = 0;
+
+    //            }
+    //            if (y < column() && this.rLine[x, y].status != 1 && this.visitedrLine[x, y] == 0 && this.visitedPoint[x, y + 1] == 0)
+    //            {
+    //                visitedrLine[x, y] = 1;
+    //                visitedPoint[x, y + 1] = 1;
+    //                flag = dfs(x, y + 1,ep);
+    //                if (flag == 1) return 1;
+    //                visitedrLine[x, y] = 0;
+    //                visitedPoint[x, y + 1] = 0;
+    //            }
+    //        }
+    //        return 0;
+    //    }
+
+    //    public void solve()
+    //    {
+    //        for (int i = 0; i < Start_Point.Count; i++)
+    //        {
+    //            for (int j = 0; j < End_Point.Count; j++)
+    //            {
+    //                visitedcLine = new int[row(), column() + 1];
+    //                visitedrLine = new int[row() + 1, column()];
+    //                visitedPoint = new int[row() + 1, column() + 1];
+    //                point sp = Start_Point[i],ep=End_Point[j];
+    //                visitedPoint[sp.x, sp.y] = 1;
+    //                dfs(sp.x, sp.y,ep);
+    //            }
+    //        }
+    //    }
         
-        public bool testrLine(int x,int y)
-        {
-            if (rLine[x, y].status == 2)
-            {
-                if (visitedrLine[x, y] == 1) return true;
-                else return false;
-            }
-            return true;
-        }
-        public bool testcLine(int x, int y)
-        {
-            if (cLine[x, y].status == 2)
-            {
-                if (visitedcLine[x, y] == 1) return true;
-                else return false;
-            }
-            return true;
-        }
-        public bool testPoint(int x,int y)
-        {
-            if (p[x, y].status == 1)
-            {
-                if (visitedPoint[x,y] != 1)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
+    //    public bool testrLine(int x,int y)
+    //    {
+    //        if (rLine[x, y].status == 2)
+    //        {
+    //            if (visitedrLine[x, y] == 1) return true;
+    //            else return false;
+    //        }
+    //        return true;
+    //    }
+    //    public bool testcLine(int x, int y)
+    //    {
+    //        if (cLine[x, y].status == 2)
+    //        {
+    //            if (visitedcLine[x, y] == 1) return true;
+    //            else return false;
+    //        }
+    //        return true;
+    //    }
+    //    public bool testPoint(int x,int y)
+    //    {
+    //        if (p[x, y].status == 1)
+    //        {
+    //            if (visitedPoint[x,y] != 1)
+    //            {
+    //                return false;
+    //            }
+    //        }
+    //        return true;
+    //    }
 
-        public bool testALLrLine()
-        {
-            for(int i = 0; i <= row; i++)
-            {
-                for(int j = 0; j < column; j++)
-                {
-                    if (testrLine(i, j) == false) return false;
-                }
-            }
-            return true;
-        }
-        public bool testALLcLine()
-        {
-            for (int i = 0; i < row; i++)
-            {
-                for (int j = 0; j <= column; j++)
-                {
-                    if (testcLine(i, j) == false) return false;
-                }
-            }
-            return true;
-        }
-        public bool testAllPoint()
-        {
-            for(int i = 0; i <= row; i++)
-            {
-                for(int j = 0; j <= column; j++)
-                {
-                    if (testPoint(i, j) == false) return false;
-                }
-            }
-            return true;
-        }
+    //    public bool testALLrLine()
+    //    {
+    //        for(int i = 0; i <= row(); i++)
+    //        {
+    //            for(int j = 0; j < column(); j++)
+    //            {
+    //                if (testrLine(i, j) == false) return false;
+    //            }
+    //        }
+    //        return true;
+    //    }
+    //    public bool testALLcLine()
+    //    {
+    //        for (int i = 0; i < row(); i++)
+    //        {
+    //            for (int j = 0; j <= column(); j++)
+    //            {
+    //                if (testcLine(i, j) == false) return false;
+    //            }
+    //        }
+    //        return true;
+    //    }
+    //    public bool testAllPoint()
+    //    {
+    //        for(int i = 0; i <= row(); i++)
+    //        {
+    //            for(int j = 0; j <= column(); j++)
+    //            {
+    //                if (testPoint(i, j) == false) return false;
+    //            }
+    //        }
+    //        return true;
+    //    }
 
-        public void Seperate()
-        {
-            visitedSquare = new int[10, 10];
-            int u = 1;
-            for (int i = 0; i < row; i++)
-            {
-                for(int j = 0; j < column; j++)
-                {
-                    if (visitedSquare[i, j] == 0)
-                    {
-                        sep(i,j,u++);
-                    }
-                }
-            }
-        }
+    //    public void Seperate()
+    //    {
+    //        visitedSquare = new int[10, 10];
+    //        int u = 1;
+    //        for (int i = 0; i < row(); i++)
+    //        {
+    //            for(int j = 0; j < column(); j++)
+    //            {
+    //                if (visitedSquare[i, j] == 0)
+    //                {
+    //                    sep(i,j,u++);
+    //                }
+    //            }
+    //        }
+    //    }
 
-        public void sep(int x,int y,int flag)
-        {
-            visitedSquare[x, y] = flag;
-            if (visitedcLine[x, y + 1] == 0 && y < column - 1) sep(x, y + 1, flag);
-            if (visitedrLine[x + 1, y] == 0 && x < row - 1) sep(x+1 , y, flag);
-            if (visitedcLine[x, y] == 0 && y >=  1&&visitedSquare[x,y-1]==0) sep(x , y-1, flag);
-            if (visitedrLine[x, y] == 0 && x>= 1 && visitedSquare[x-1, y ] == 0) sep(x-1, y, flag);
-        }
+    //    public void sep(int x,int y,int flag)
+    //    {
+    //        visitedSquare[x, y] = flag;
+    //        if (visitedcLine[x, y + 1] == 0 && y < column() - 1) sep(x, y + 1, flag);
+    //        if (visitedrLine[x + 1, y] == 0 && x < row() - 1) sep(x+1 , y, flag);
+    //        if (visitedcLine[x, y] == 0 && y >=  1&&visitedSquare[x,y-1]==0) sep(x , y-1, flag);
+    //        if (visitedrLine[x, y] == 0 && x>= 1 && visitedSquare[x-1, y ] == 0) sep(x-1, y, flag);
+    //    }
 
-        public bool testSquareOct()
-        {
-            int[,] oct= new int[10, 10];
-            int[,] squ = new int[10, 10];
-            for(int i = 0; i < row; i++)
-            {
-                for(int j = 0; j < column; j++)
-                {
-                    if (s[i, j].squ != -1) squ[visitedSquare[i, j], s[i, j].squ]++;
-                    if (s[i, j].oct != -1) oct[visitedSquare[i, j], s[i, j].oct]++;
-                }
-            }
-            for(int i = 0; i < 10; i++)
-            {
-                int flag = 0;
-                for(int j = 0; j < 10; j++)
-                {
-                    if (oct[i, j] != 0&&oct[i,j]!=2) return false;
-                    if (squ[i, j] != 0) flag++;
-                    if (flag > 1) return false;
-                }
-            }
-            //for(int j = 0; j < 4; j++)
-            //{
-            //    int flag = 0;
-            //    for(int i = 0; i < 10; i++)
-            //    {
-            //        if (squ[i, j] != 0) flag++;
-            //        if (flag > 1) return false;
-            //    }
-            //}
-            return true;
-        }
+    //    public bool testSquareOct()
+    //    {
+    //        int[,] oct= new int[10, 10];
+    //        int[,] squ = new int[10, 10];
+    //        for(int i = 0; i < row(); i++)
+    //        {
+    //            for(int j = 0; j < column(); j++)
+    //            {
+    //                if (s[i, j].squ != -1) squ[visitedSquare[i, j], s[i, j].squ]++;
+    //                if (s[i, j].oct != -1) oct[visitedSquare[i, j], s[i, j].oct]++;
+    //            }
+    //        }
+    //        for(int i = 0; i < 10; i++)
+    //        {
+    //            int flag = 0;
+    //            for(int j = 0; j < 10; j++)
+    //            {
+    //                if (oct[i, j] != 0&&oct[i,j]!=2) return false;
+    //                if (squ[i, j] != 0) flag++;
+    //                if (flag > 1) return false;
+    //            }
+    //        }
+    //        //for(int j = 0; j < 4; j++)
+    //        //{
+    //        //    int flag = 0;
+    //        //    for(int i = 0; i < 10; i++)
+    //        //    {
+    //        //        if (squ[i, j] != 0) flag++;
+    //        //        if (flag > 1) return false;
+    //        //    }
+    //        //}
+    //        return true;
+    //    }
 
-        public bool test()
-        {
-            Seperate();
-            if (testALLcLine() == false) return false;
-            if (testALLrLine() == false) return false;
-            if (testAllPoint() == false) return false;
-            if (testSquareOct() == false) return false;
-            return true;
-        }
-    }  
+    //    public bool test()
+    //    {
+    //        Seperate();
+    //        if (testALLcLine() == false) return false;
+    //        if (testALLrLine() == false) return false;
+    //        if (testAllPoint() == false) return false;
+    //        if (testSquareOct() == false) return false;
+    //        return true;
+    //    }
+    //}  
 
 }

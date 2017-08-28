@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="592.637" Width="923.277">
+        Title="MainWindow" Height="690.637" Width="923.277">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
@@ -13,16 +13,16 @@
         </Grid.ColumnDefinitions>
         <Border BorderBrush="Black" BorderThickness="1"  Margin="40,45,40,45" Grid.Column="0">
             <Grid>
-                <local:DrawingCanvas x:Name="canvas" HorizontalAlignment="Left" Background="White" Height="228" VerticalAlignment="Top" Width="183" MouseLeftButtonDown="canvas_MouseLeftButtonDown"/>
+                <local:DrawingCanvas x:Name="canvas" HorizontalAlignment="Left" Background="White" Height="548" VerticalAlignment="Top" Width="356" MouseLeftButtonDown="canvas_MouseLeftButtonDown" Margin="10,10,0,0"/>
             </Grid>
         </Border>
-        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Height="35" Margin="72,479,0,0" VerticalAlignment="Top" Width="105" Grid.Column="1" Click="button_Click"/>
+        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Height="35" Margin="73,552,0,0" VerticalAlignment="Top" Width="105" Grid.Column="1" Click="button_Click"/>
         <Grid Grid.Column="1" HorizontalAlignment="Left" Height="168" Margin="10,45,0,0" VerticalAlignment="Top" Width="395">
             <TextBox x:Name="textBox" HorizontalAlignment="Left" Height="20" Margin="52,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="45" Text="3"/>
             <TextBox x:Name="textBox_Copy" HorizontalAlignment="Left" Height="20" Margin="172,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="45" Text="3"/>
             <Label x:Name="label" Content="Row" HorizontalAlignment="Left" Height="30" Margin="10,46,0,0" VerticalAlignment="Top" Width="42"/>
             <Label x:Name="label1" Content="Column" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="121,46,0,0"/>
-            <TextBox x:Name="textBox_Height" HorizontalAlignment="Left" Height="20" Margin="52,87,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="45" Text="10" TextChanged="textBox_Height_TextChanged"/>
+            <TextBox x:Name="textBox_Height" HorizontalAlignment="Left" Height="20" Margin="52,87,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="45" Text="12"/>
             <TextBox x:Name="textBox_Width" HorizontalAlignment="Left" Height="20" Margin="172,87,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="45" Text="60"/>
             <Label x:Name="label_Copy" Content="Height" HorizontalAlignment="Left" Height="30" Margin="0,83,0,0" VerticalAlignment="Top" Width="52"/>
             <Label x:Name="label_Copy1" Content="Width" HorizontalAlignment="Left" Height="30" Margin="121,83,0,0" VerticalAlignment="Top" Width="52"/>
@@ -36,7 +36,7 @@
             <Label x:Name="label2_Copy2" Content="Label" HorizontalAlignment="Left" Margin="172,306,0,-172" VerticalAlignment="Top" Height="34" Width="71"/>
             <Label x:Name="label3" Content="Label" HorizontalAlignment="Left" Margin="30,0,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.237,0.038" Height="29" Width="104"/>
         </Grid>
-        <Button x:Name="button1" Content="Button" HorizontalAlignment="Left" VerticalAlignment="Top" Width="105" Grid.Column="1" Margin="270,479,0,0" Height="38" Click="button1_Click"/>
+        <Button x:Name="button1" Content="Button" HorizontalAlignment="Left" VerticalAlignment="Top" Width="105" Grid.Column="1" Margin="270,552,0,0" Height="38" Click="button1_Click"/>
         <Grid Grid.Column="1" HorizontalAlignment="Left" Height="78" Margin="4,249,0,0" VerticalAlignment="Top" Width="371">
             <Grid.RowDefinitions>
                 <RowDefinition></RowDefinition>
@@ -73,5 +73,8 @@
         <Button x:Name="button2" Content="起点" Grid.Column="1" HorizontalAlignment="Left" Margin="47,383,0,0" VerticalAlignment="Top" Width="87" Height="43" Click="button2_Click"/>
         <Button x:Name="button2_Copy" Content="终点" Grid.Column="1" HorizontalAlignment="Left" Margin="177,383,0,0" VerticalAlignment="Top" Width="87" Height="43" Click="button2_Copy_Click"/>
         <Button x:Name="button2_Copy1" Content="必须通过" Grid.Column="1" HorizontalAlignment="Left" Margin="303,383,0,0" VerticalAlignment="Top" Width="87" Height="43" Click="button2_Copy1_Click"/>
+        <Button x:Name="button3" Content="清空" Grid.Column="1" HorizontalAlignment="Left" Margin="47,452,0,0" VerticalAlignment="Top" Width="87" Height="43" Click="button3_Click"/>
+        <Button x:Name="button3_Copy" Content="必须通过" Grid.Column="1" HorizontalAlignment="Left" Margin="177,452,0,0" VerticalAlignment="Top" Width="87" Height="43" Click="button3_Copy_Click"/>
+        <Button x:Name="button3_Copy1" Content="不可通过" Grid.Column="1" HorizontalAlignment="Left" Margin="303,452,0,0" VerticalAlignment="Top" Width="87" Height="43" Click="button3_Copy1_Click"/>
     </Grid>
 </Window>
