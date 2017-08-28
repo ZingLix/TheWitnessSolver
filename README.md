@@ -6,7 +6,7 @@ This is a program designed to solve the puzzle in the game The Witness.
 
 The Witness is a puzzle game which main form is  one touch drawing just like the pictures below.
 
-!([https://zinglix.xyz/img/in-post/WitnessSolver/1.jpg](https://zinglix.xyz/img/in-post/WitnessSolver/1.jpg))
+![1.jpg](https://zinglix.xyz/img/in-post/WitnessSolver/1.jpg)
 
 There will be lots of different shapes in the  
 
